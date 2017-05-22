@@ -1,0 +1,71 @@
+#%RAML 1.0 Library
+
+traits:
+  pageable:
+    usage: Apply this trait to a GET method that supports pagination.
+    queryParameters:
+      offset?:
+        type: integer
+        default: 10
+        minimum: 0
+        description: The `offset` parameter specifies the first entry to return from a collection.
+      limit?:
+        type: integer
+        default: 50
+        minimum: 1
+        description: The `limit` parameter restricts the number of entries returned.
+      page?:
+        type: integer
+        default: 1
+        minimum: 1
+        description: The `page` parameter specifies the page of results to return.
+
+  partial:
+    usage: Apply this trait to a metheod that supports returning only specific attributes of the response
+    queryParameters:
+      fields:
+        type: string
+        description: |
+          Comma-separated expressions to be used to select attributes of the response.
+        example: $.store.name, $.store.book
+
+  sortable:
+    usage: Apply this to a method that support sorting.
+    queryParameters:
+      sort?:
+        type: string
+        example: name,-age
+
+  content-cachable:
+    usage: Apply this trait to a GET method that supports content-based caching using ETags
+    headers:
+      If-None-Match?:
+        type: string
+        description: |
+          Requests the resource only if its version (previously returned in the ETag header)
+          is different than the one provided in this header. If the resource has not been modified
+          (it still has the same version), then HTTP status code '304 Not Modified' (with empty body)
+          will be returned instead of the actual resource.
+        example: 8b8405f6-b3e6-41a0-9f72-d7a283001a09
+    responses:
+      200:
+        description: |
+          The resource has been modified. The body contains the new resource.
+        headers:
+          ETag:
+            type: string
+            example: adcab6f4-0086-4966-829a-d986a2c76aa2
+          Cache-Control:
+            type: string
+            example: private, max-age=3600000
+      304:
+        description: |
+          The resource has not been modified, the body is empty and the version cached by the API
+          consumer client may be used.
+        headers:
+          ETag:
+            type: string
+            example: 8b8405f6-b3e6-41a0-9f72-d7a283001a09
+          Cache-Control:
+            type: string
+            example: private, max-age=3600000
